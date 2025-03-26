@@ -3,7 +3,7 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from repository.scanner import RepositoryScanner
+from test_coverage_agent.repository.scanner import RepositoryScanner
 
 
 class TestRepositoryScanner:

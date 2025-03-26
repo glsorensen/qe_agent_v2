@@ -4,7 +4,7 @@ import tempfile
 import subprocess
 from unittest.mock import patch, MagicMock
 
-from test_execution.test_runner import TestRunner, TestRunResult
+from test_coverage_agent.test_execution.test_runner import TestRunner, TestRunResult
 
 
 class TestTestRunner:
@@ -142,8 +142,8 @@ def test_failing():
         assert result.success is False
         assert "Unsupported test file type" in result.error_message
     
-    @patch("test_execution.test_runner.tempfile.NamedTemporaryFile")
-    @patch("test_execution.test_runner.os.unlink")
+    @patch("test_coverage_agent.test_execution.test_runner.tempfile.NamedTemporaryFile")
+    @patch("test_coverage_agent.test_execution.test_runner.os.unlink")
     def test_run_test_code(self, mock_unlink, mock_temp_file, sample_repo):
         """Test running test code directly."""
         # Set up mocks

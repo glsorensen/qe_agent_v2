@@ -6,6 +6,7 @@ The Test Coverage Agent can be configured through command-line arguments or a co
 
 ```
 usage: python run.py [repository_path] [options]
+   or: python -m test_coverage_agent.main [repository_path] [options]
 ```
 
 ### General Options

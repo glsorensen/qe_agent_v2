@@ -8,8 +8,8 @@ import sys
 sys.modules['langchain.chat_models'] = MagicMock()
 sys.modules['langchain.schema'] = MagicMock()
 
-from test_execution.test_validator import TestValidator, TestValidationResult
-from test_execution.test_runner import TestRunResult
+from test_coverage_agent.test_execution.test_validator import TestValidator, TestValidationResult
+from test_coverage_agent.test_execution.test_runner import TestRunResult
 
 
 class TestTestValidator:
@@ -30,7 +30,7 @@ class TestTestValidator:
         assert validator.model is None
         assert validator.test_runner is not None
     
-    @patch("test_execution.test_validator.ChatAnthropic")
+    @patch("test_coverage_agent.test_execution.test_validator.ChatAnthropic")
     def test_init_with_api_key(self, mock_claude, sample_repo):
         """Test initializing the TestValidator with an API key."""
         # For this test, we skip the mock check since the import is already mocked
@@ -137,7 +137,7 @@ console.log(result);
         assert "No test blocks found" in result.issues
         assert "No assertions found" in result.issues
     
-    @patch("test_execution.test_runner.TestRunner.run_test_code")
+    @patch("test_coverage_agent.test_execution.test_runner.TestRunner.run_test_code")
     def test_validate_test_success(self, mock_run_test, sample_repo):
         """Test validating a test that passes."""
         mock_run_test.return_value = TestRunResult(
@@ -168,7 +168,7 @@ console.log(result);
         assert result.run_result is not None
         assert result.run_result.success is True
     
-    @patch("test_execution.test_runner.TestRunner.run_test_code")
+    @patch("test_coverage_agent.test_execution.test_runner.TestRunner.run_test_code")
     def test_validate_test_syntax_failure(self, mock_run_test, sample_repo):
         """Test validating a test with syntax issues."""
         validator = TestValidator(sample_repo)
@@ -191,7 +191,7 @@ console.log(result);
         assert result.run_result is None  # Test shouldn't run if syntax validation fails
         mock_run_test.assert_not_called()
     
-    @patch("test_execution.test_runner.TestRunner.run_test_code")
+    @patch("test_coverage_agent.test_execution.test_runner.TestRunner.run_test_code")
     def test_validate_test_run_failure(self, mock_run_test, sample_repo):
         """Test validating a test that fails when run."""
         mock_run_test.return_value = TestRunResult(

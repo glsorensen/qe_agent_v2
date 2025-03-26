@@ -1,6 +1,6 @@
 import pytest
 
-from test_generation.template_manager import TestTemplateManager, TestTemplate
+from test_coverage_agent.test_generation.template_manager import TestTemplateManager, TestTemplate
 
 
 class TestTestTemplateManager:

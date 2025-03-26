@@ -3,7 +3,7 @@ import ast
 import pytest
 import tempfile
 
-from test_generation.code_understanding import CodeUnderstandingModule, Function, Class
+from test_coverage_agent.test_generation.code_understanding import CodeUnderstandingModule, Function, Class
 
 
 class TestCodeUnderstanding:

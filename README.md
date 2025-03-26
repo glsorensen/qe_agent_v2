@@ -27,11 +27,13 @@ An AI-powered tool that intelligently analyzes code repositories, identifies tes
 git clone https://github.com/yourusername/test-coverage-agent.git
 cd test-coverage-agent
 
-# Install dependencies
-pip install -r requirements.txt
+# Install package
+pip install -e .
 
 # Run the tool on a repository
 python run.py /path/to/your/repo
+# or
+python -m test_coverage_agent.main /path/to/your/repo
 ```
 
 ## 📊 Usage Examples
@@ -41,6 +43,8 @@ python run.py /path/to/your/repo
 ```bash
 # Analyze a repository
 python run.py /path/to/repo
+# or
+python -m test_coverage_agent.main /path/to/repo
 
 # Run with web interface
 python run.py --web
@@ -112,10 +116,10 @@ Documentation structure:
 
 Code organization:
 
-- `repository/`: Modules for scanning and analyzing repositories
-- `test_execution/`: Tools for running and validating tests
-- `test_generation/`: AI-powered test generation components
-- `ui/`: Command line and web interfaces
+- `src/test_coverage_agent/repository/`: Modules for scanning and analyzing repositories
+- `src/test_coverage_agent/test_execution/`: Tools for running and validating tests
+- `src/test_coverage_agent/test_generation/`: AI-powered test generation components
+- `src/test_coverage_agent/ui/`: Command line and web interfaces
 
 ## 🤝 Contributing
 

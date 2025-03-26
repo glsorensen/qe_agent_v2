@@ -9,35 +9,39 @@ The codebase follows a modular organization:
 ```
 test-coverage-agent/
 ├── __init__.py                 # Package initialization
-├── main.py                     # Entry point
 ├── run.py                      # CLI entry script
-├── pyproject.toml             # Project metadata and dependencies
-├── requirements.txt           # Dependencies list
+├── pyproject.toml              # Project metadata and dependencies
+├── requirements.txt            # Dependencies list
 │
-├── repository/                 # Repository analysis components
-│   ├── __init__.py
-│   ├── scanner.py              # Repository structure scanner
-│   ├── test_detector.py        # Test file detection
-│   └── coverage_analyzer.py    # Coverage analysis
-│
-├── test_execution/             # Test execution components
-│   ├── __init__.py
-│   ├── test_runner.py          # Test execution
-│   ├── test_validator.py       # Test quality validation
-│   └── coverage_reporter.py    # Coverage reporting
-│
-├── test_generation/            # Test generation components
-│   ├── __init__.py
-│   ├── code_understanding.py   # Code analysis for test generation
-│   ├── template_manager.py     # Test template management
-│   └── test_writer.py          # AI-powered test generation
-│
-├── ui/                         # User interfaces
-│   ├── __init__.py
-│   ├── cli.py                  # Command-line interface
-│   ├── cli_for_testing.py      # Test-specific CLI version
-│   ├── web.py                  # Web interface
-│   └── web_for_testing.py      # Test-specific web version
+├── src/                        # Source code directory
+│   └── test_coverage_agent/    # Main package
+│       ├── __init__.py         # Package initialization
+│       ├── main.py             # Entry point
+│       │
+│       ├── repository/         # Repository analysis components
+│       │   ├── __init__.py
+│       │   ├── scanner.py      # Repository structure scanner
+│       │   ├── test_detector.py # Test file detection
+│       │   └── coverage_analyzer.py # Coverage analysis
+│       │
+│       ├── test_execution/     # Test execution components
+│       │   ├── __init__.py
+│       │   ├── test_runner.py  # Test execution
+│       │   ├── test_validator.py # Test quality validation
+│       │   └── coverage_reporter.py # Coverage reporting
+│       │
+│       ├── test_generation/    # Test generation components
+│       │   ├── __init__.py
+│       │   ├── code_understanding.py # Code analysis for test generation
+│       │   ├── template_manager.py # Test template management
+│       │   └── test_writer.py  # AI-powered test generation
+│       │
+│       └── ui/                 # User interfaces
+│           ├── __init__.py
+│           ├── cli.py          # Command-line interface
+│           ├── cli_for_testing.py # Test-specific CLI version
+│           ├── web.py          # Web interface
+│           └── web_for_testing.py # Test-specific web version
 │
 └── tests/                      # Test suite
     ├── __init__.py
