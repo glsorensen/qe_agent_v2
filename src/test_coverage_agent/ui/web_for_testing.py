@@ -1,6 +1,5 @@
 import os
-from typing import Dict, List, Optional, Set, Tuple, Any
-import json
+from typing import Dict, List, Optional, Tuple, Any
 
 # Import necessary components from the right paths
 from test_coverage_agent.repository.scanner import RepositoryScanner
