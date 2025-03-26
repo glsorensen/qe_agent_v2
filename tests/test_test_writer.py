@@ -3,12 +3,12 @@ import pytest
 import tempfile
 from unittest.mock import patch, MagicMock
 
-# Mock the langchain import
+# Mock the langchain imports
 import sys
 sys.modules['langchain.chains'] = MagicMock()
-sys.modules['langchain.chat_models'] = MagicMock()
-sys.modules['langchain.prompts'] = MagicMock()
-sys.modules['langchain.schema'] = MagicMock()
+sys.modules['langchain_community.chat_models'] = MagicMock()
+sys.modules['langchain_core.prompts'] = MagicMock()
+sys.modules['langchain_core.messages'] = MagicMock()
 
 from test_generation.test_writer import AIPoweredTestWriter
 from test_generation.code_understanding import CodeUnderstandingModule, Function, Class
@@ -76,7 +76,7 @@ class TestAIPoweredTestWriter:
             base_classes=[]
         )
     
-    @patch("langchain.chat_models.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_init(self, mock_claude):
         """Test initializing the AIPoweredTestWriter."""
         code_understanding = MagicMock(spec=CodeUnderstandingModule)
@@ -90,7 +90,7 @@ class TestAIPoweredTestWriter:
         assert writer.model is not None
         mock_claude.assert_called_once()
     
-    @patch("langchain.chat_models.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_generate_function_test_with_template(self, mock_claude, mock_function):
         """Test generating a test for a function using a template."""
         # Mock the necessary components
@@ -131,7 +131,7 @@ class TestAIPoweredTestWriter:
         # Check the result
         assert test_code == "def test_add():\n    assert add(1, 2) == 3"
     
-    @patch("langchain.chat_models.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_generate_function_test_without_template(self, mock_claude, mock_function):
         """Test generating a test for a function without a template."""
         # Mock the necessary components
@@ -174,7 +174,7 @@ def test_add():
         assert "assert add(5, -3) == 2" in test_code
         assert "assert add(-1, -1) == -2" in test_code
     
-    @patch("langchain.chat_models.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_generate_method_test(self, mock_claude, mock_method):
         """Test generating a test for a method using a template."""
         # Mock the necessary components
@@ -215,7 +215,7 @@ def test_add():
         # Check the result
         assert test_code == "def test_subtract():\n    calc = Calculator()\n    assert calc.subtract(5, 3) == 2"
     
-    @patch("langchain.chat_models.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_generate_class_test(self, mock_claude, mock_class):
         """Test generating a test for a class using a template."""
         # Mock the necessary components
@@ -255,7 +255,7 @@ def test_add():
         # Check the result
         assert test_code == "class TestCalculator:\n    def test_multiply(self):\n        calc = Calculator()\n        assert calc.multiply(3, 4) == 12"
     
-    @patch("langchain.chat_models.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_file_path_to_module_path(self, mock_claude):
         """Test converting a file path to a Python module path."""
         code_understanding = MagicMock(spec=CodeUnderstandingModule)

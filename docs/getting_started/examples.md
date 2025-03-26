@@ -50,6 +50,12 @@ Start the web interface:
 python run.py --web
 ```
 
+You can also specify a repository path, but it's optional since you can provide it in the web interface:
+
+```bash
+python run.py --web /path/to/your/project
+```
+
 The web interface provides:
 
 - Repository overview dashboard
