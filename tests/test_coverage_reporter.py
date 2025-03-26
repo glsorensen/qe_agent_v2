@@ -5,7 +5,7 @@ import tempfile
 from datetime import datetime
 from unittest.mock import patch, MagicMock
 
-from test_execution.coverage_reporter import CoverageReporter, CoverageReport
+from test_coverage_agent.test_execution.coverage_reporter import CoverageReporter, CoverageReport
 
 
 class TestCoverageReporter:
@@ -132,7 +132,7 @@ class TestCoverageReporter:
         )
         
         # Mock datetime to get consistent filenames
-        with patch('test_execution.coverage_reporter.datetime') as mock_datetime:
+        with patch('test_coverage_agent.test_execution.coverage_reporter.datetime') as mock_datetime:
             mock_datetime.now.return_value = datetime(2025, 1, 1, 12, 0, 0)
             mock_datetime.strftime.return_value = '20250101_120000'
             
@@ -163,7 +163,7 @@ class TestCoverageReporter:
         )
         
         # Mock datetime to get consistent filenames
-        with patch('test_execution.coverage_reporter.datetime') as mock_datetime:
+        with patch('test_coverage_agent.test_execution.coverage_reporter.datetime') as mock_datetime:
             mock_datetime.now.return_value = datetime(2025, 1, 1, 12, 0, 0)
             mock_datetime.strftime.return_value = '20250101_120000'
             

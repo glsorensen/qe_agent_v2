@@ -3,8 +3,8 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from repository.scanner import RepositoryScanner
-from repository.test_detector import TestDetector, TestFramework
+from test_coverage_agent.repository.scanner import RepositoryScanner
+from test_coverage_agent.repository.test_detector import TestDetector, TestFramework
 
 
 class TestTestDetector:

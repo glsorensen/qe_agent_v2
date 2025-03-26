@@ -4,15 +4,10 @@ import streamlit as st
 import json
 from typing import Dict, List, Optional, Set, Tuple, Any
 
-# Add parent directory to path to make imports work
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 # Import necessary components
-from repository import RepositoryScanner, TestDetector, CoverageAnalyzer
-from test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
-from test_execution import TestRunner, TestValidator, CoverageReporter
+from test_coverage_agent.repository import RepositoryScanner, TestDetector, CoverageAnalyzer
+from test_coverage_agent.test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
+from test_coverage_agent.test_execution import TestRunner, TestValidator, CoverageReporter
 
 
 def main():

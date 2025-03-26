@@ -3,10 +3,10 @@ from typing import Dict, List, Optional, Set, Tuple, Any
 import json
 
 # Import necessary components from the right paths
-from repository.scanner import RepositoryScanner
-from repository.test_detector import TestDetector
-from repository.coverage_analyzer import CoverageAnalyzer
-from test_execution.coverage_reporter import CoverageReporter
+from test_coverage_agent.repository.scanner import RepositoryScanner
+from test_coverage_agent.repository.test_detector import TestDetector
+from test_coverage_agent.repository.coverage_analyzer import CoverageAnalyzer
+from test_coverage_agent.test_execution.coverage_reporter import CoverageReporter
 
 class WebUI:
     """Web UI interface for the Test Coverage Enhancement Agent."""

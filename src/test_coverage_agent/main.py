@@ -4,10 +4,10 @@ import argparse
 from typing import Dict, List, Optional, Set, Tuple, Any
 
 # Import necessary components
-from repository import RepositoryScanner, TestDetector, CoverageAnalyzer
-from test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
-from test_execution import TestRunner, TestValidator, CoverageReporter
-from ui.cli import cli
+from test_coverage_agent.repository import RepositoryScanner, TestDetector, CoverageAnalyzer
+from test_coverage_agent.test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
+from test_coverage_agent.test_execution import TestRunner, TestValidator, CoverageReporter
+from test_coverage_agent.ui.cli import cli
 
 
 def main():
@@ -50,15 +50,20 @@ def main():
     if args.web:
         import subprocess
         import os
-        web_script_path = os.path.join(os.path.dirname(__file__), 'ui', 'web.py')
+        import importlib.util
+        from pathlib import Path
+        
+        # Get the path to the web.py module
+        from test_coverage_agent.ui import web
+        web_script_path = Path(web.__file__).resolve()
         print(f"Starting Streamlit web interface from: {web_script_path}")
-        subprocess.run(['streamlit', 'run', web_script_path])
+        subprocess.run(['streamlit', 'run', str(web_script_path)])
         return
     
     # Check if a repository path was provided
     if args.repo_path:
         # Use CLI via click
-        from ui.cli import cli
+        from test_coverage_agent.ui.cli import cli
         cli(['analyze', args.repo_path])
     else:
         parser.print_help()

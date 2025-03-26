@@ -3,7 +3,7 @@ import pytest
 import tempfile
 from unittest.mock import patch, MagicMock
 
-from ui.cli_for_testing import CLI
+from test_coverage_agent.ui.cli_for_testing import CLI
 
 
 class TestCLI:
@@ -36,7 +36,7 @@ class TestCLI:
         assert any("Test Coverage Enhancement Agent" in call[0][0] for call in mock_print.call_args_list)
     
     @patch("builtins.print")
-    @patch("repository.scanner.RepositoryScanner")
+    @patch("test_coverage_agent.ui.cli_for_testing.RepositoryScanner")
     def test_scan_repository(self, mock_scanner, mock_print, sample_repo):
         """Test scanning the repository."""
         # Mock the scanner
@@ -60,8 +60,8 @@ class TestCLI:
         mock_print.assert_called()
     
     @patch("builtins.print")
-    @patch("repository.scanner.RepositoryScanner")
-    @patch("repository.test_detector.TestDetector")
+    @patch("test_coverage_agent.ui.cli_for_testing.RepositoryScanner")
+    @patch("test_coverage_agent.ui.cli_for_testing.TestDetector")
     def test_detect_tests(self, mock_detector, mock_scanner, mock_print, sample_repo):
         """Test detecting tests in the repository."""
         # Mock the scanner
@@ -97,8 +97,8 @@ class TestCLI:
         mock_print.assert_called()
     
     @patch("builtins.print")
-    @patch("repository.scanner.RepositoryScanner")
-    @patch("repository.coverage_analyzer.CoverageAnalyzer")
+    @patch("test_coverage_agent.ui.cli_for_testing.RepositoryScanner")
+    @patch("test_coverage_agent.ui.cli_for_testing.CoverageAnalyzer")
     def test_analyze_coverage(self, mock_analyzer, mock_scanner, mock_print, sample_repo):
         """Test analyzing test coverage."""
         # Mock the scanner
@@ -138,9 +138,9 @@ class TestCLI:
         mock_print.assert_called()
     
     @patch("builtins.print")
-    @patch("ui.cli.CLI.scan_repository")
-    @patch("ui.cli.CLI.detect_tests")
-    @patch("ui.cli.CLI.analyze_coverage")
+    @patch("test_coverage_agent.ui.cli_for_testing.CLI.scan_repository")
+    @patch("test_coverage_agent.ui.cli_for_testing.CLI.detect_tests")
+    @patch("test_coverage_agent.ui.cli_for_testing.CLI.analyze_coverage")
     def test_run(self, mock_analyze, mock_detect, mock_scan, mock_print, sample_repo):
         """Test running the full CLI workflow."""
         cli = CLI(sample_repo)
