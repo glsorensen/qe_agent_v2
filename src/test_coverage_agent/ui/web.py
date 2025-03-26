@@ -42,7 +42,7 @@ def main():
     with tab1:
         st.header("Repository Analysis")
         
-        if st.button("Analyze Repository", disabled=not repo_path, key="analyze_repo_button"):
+        if st.button("Analyze Repo", disabled=not repo_path, key="analyze_repo_button"):
             if not os.path.exists(repo_path):
                 st.error(f"Repository path does not exist: {repo_path}")
                 return
