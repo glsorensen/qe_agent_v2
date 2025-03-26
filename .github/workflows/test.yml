@@ -48,6 +48,6 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: 08e96ceb-75b8-49e1-9ba4-92616d195a57
         file: ./coverage.xml
         fail_ci_if_error: false
