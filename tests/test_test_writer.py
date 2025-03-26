@@ -1,286 +1,351 @@
 import os
 import pytest
 import tempfile
-from unittest.mock import patch, MagicMock
-
-# Mock the langchain imports
-import sys
-sys.modules['langchain.chains'] = MagicMock()
-sys.modules['langchain_community.chat_models'] = MagicMock()
-sys.modules['langchain_core.prompts'] = MagicMock()
-sys.modules['langchain_core.messages'] = MagicMock()
+from unittest.mock import patch, MagicMock, Mock
 
 from test_coverage_agent.test_generation.test_writer import AIPoweredTestWriter
-from test_coverage_agent.test_generation.code_understanding import CodeUnderstandingModule, Function, Class
-from test_coverage_agent.test_generation.template_manager import TestTemplateManager
+from test_coverage_agent.test_generation.code_understanding import Function, Class
+
+
+@pytest.fixture
+def mock_code_understanding():
+    """Create a mock CodeUnderstandingModule."""
+    mock = MagicMock()
+    mock.repo_path = "/repo"
+    return mock
+
+
+@pytest.fixture
+def mock_template_manager():
+    """Create a mock TestTemplateManager."""
+    mock = MagicMock()
+    
+    # Mock template
+    mock_template = MagicMock()
+    mock_template.name = "pytest_function"
+    mock_template.language = "python"
+    mock_template.framework = "pytest"
+    mock_template.template = """
+import pytest
+from {module_path} import {target_name}
+
+def test_{function_name}():
+    # Arrange
+    {arrange_code}
+    
+    # Act
+    result = {function_call}
+    
+    # Assert
+    {assert_code}
+"""
+    
+    # Mock method template
+    mock_method_template = MagicMock()
+    mock_method_template.name = "pytest_method"
+    mock_method_template.language = "python"
+    mock_method_template.framework = "pytest"
+    mock_method_template.template = """
+import pytest
+from {module_path} import {class_name}
+
+def test_{method_name}():
+    # Arrange
+    {instance_create}
+    {arrange_code}
+    
+    # Act
+    result = {method_call}
+    
+    # Assert
+    {assert_code}
+"""
+    
+    # Mock class template
+    mock_class_template = MagicMock()
+    mock_class_template.name = "pytest_class"
+    mock_class_template.language = "python"
+    mock_class_template.framework = "pytest"
+    mock_class_template.template = """
+import pytest
+from {module_path} import {class_name}
+
+class Test{class_name}:
+    @pytest.fixture
+    def {fixture_name}(self):
+        {fixture_code}
+        return {instance_creation}
+    
+{test_methods}
+"""
+    
+    # Setup the get_templates_for_language_framework method
+    def mock_get_templates(language, framework):
+        if language == "python" and framework == "pytest":
+            return [mock_template, mock_method_template, mock_class_template]
+        return []
+    
+    mock.get_templates_for_language_framework.side_effect = mock_get_templates
+    
+    # Setup the get_template method
+    def mock_get_template(language, framework, name):
+        if language == "python" and framework == "pytest":
+            if name == "pytest_function":
+                return mock_template
+            elif name == "pytest_method":
+                return mock_method_template
+            elif name == "pytest_class":
+                return mock_class_template
+        return None
+    
+    mock.get_template.side_effect = mock_get_template
+    
+    # Setup the create_test_from_template method
+    def mock_create_test(template, variables):
+        result = template.template
+        for key, value in variables.items():
+            result = result.replace(f"{{{key}}}", value)
+        return result
+    
+    mock.create_test_from_template.side_effect = mock_create_test
+    
+    return mock
+
+
+@pytest.fixture
+def mock_llm_provider_factory():
+    """Mock the LLMProviderFactory."""
+    with patch('test_coverage_agent.test_generation.test_writer.LLMProviderFactory') as mock_factory:
+        mock_provider = MagicMock()
+        mock_model = MagicMock()
+        
+        # Setup response
+        mock_response = MagicMock()
+        mock_response.content = '```json\n{"arrange_code": "x = 5\\ny = 10", "function_call": "add(x, y)", "assert_code": "assert result == 15", "test_description": "correctly adds two positive numbers"}\n```'
+        mock_model.invoke.return_value = mock_response
+        
+        mock_provider.get_model.return_value = mock_model
+        mock_factory.create_provider.return_value = mock_provider
+        
+        yield mock_factory
+
+
+@pytest.fixture
+def function_to_test():
+    """Create a sample function for testing."""
+    return Function(
+        name="add",
+        file_path="/repo/math/operations.py",
+        line_start=1,
+        line_end=2,
+        code="def add(x, y):\n    return x + y",
+        is_method=False,
+        class_name="",
+        docstring="",
+        params=["x", "y"],
+        return_type=""
+    )
+
+
+@pytest.fixture
+def method_to_test():
+    """Create a sample method for testing."""
+    return Function(
+        name="add",
+        file_path="/repo/math/calculator.py",
+        line_start=1,
+        line_end=2,
+        code="def add(self, x, y):\n    return x + y",
+        is_method=True,
+        class_name="Calculator",
+        docstring="",
+        params=["self", "x", "y"],
+        return_type=""
+    )
+
+
+@pytest.fixture
+def class_to_test():
+    """Create a sample class for testing."""
+    return Class(
+        name="Calculator",
+        file_path="/repo/math/calculator.py",
+        line_start=1,
+        line_end=5,
+        code="class Calculator:\n    def __init__(self):\n        pass\n    \n    def add(self, x, y):\n        return x + y",
+        methods=[],
+        base_classes=[],
+        docstring=""
+    )
 
 
 class TestAIPoweredTestWriter:
     """Tests for the AIPoweredTestWriter class."""
     
-    @pytest.fixture
-    def mock_function(self):
-        """Create a mock function for testing."""
-        return Function(
-            name="add",
-            file_path="/repo/calculator.py",
-            line_start=10,
-            line_end=12,
-            code="def add(a: int, b: int) -> int:\n    \"\"\"Add two numbers.\"\"\"\n    return a + b",
-            docstring="Add two numbers.",
-            params=["a", "b"],
-            return_type="int",
-            is_method=False
-        )
-    
-    @pytest.fixture
-    def mock_method(self):
-        """Create a mock method for testing."""
-        return Function(
-            name="subtract",
-            file_path="/repo/calculator.py",
-            line_start=15,
-            line_end=17,
-            code="def subtract(self, a: int, b: int) -> int:\n    \"\"\"Subtract b from a.\"\"\"\n    return a - b",
-            docstring="Subtract b from a.",
-            params=["a", "b"],
-            return_type="int",
-            is_method=True,
-            class_name="Calculator"
-        )
-    
-    @pytest.fixture
-    def mock_class(self):
-        """Create a mock class for testing."""
-        method = Function(
-            name="multiply",
-            file_path="/repo/calculator.py",
-            line_start=15,
-            line_end=17,
-            code="def multiply(self, a: int, b: int) -> int:\n    \"\"\"Multiply two numbers.\"\"\"\n    return a * b",
-            docstring="Multiply two numbers.",
-            params=["a", "b"],
-            return_type="int",
-            is_method=True,
-            class_name="Calculator"
+    def test_init(self, mock_code_understanding, mock_template_manager, mock_llm_provider_factory):
+        """Test initializing the test writer."""
+        writer = AIPoweredTestWriter(
+            api_key="test-key",
+            code_understanding=mock_code_understanding,
+            template_manager=mock_template_manager,
+            provider_name="claude"
         )
         
-        return Class(
-            name="Calculator",
-            file_path="/repo/calculator.py",
-            line_start=5,
-            line_end=20,
-            code="class Calculator:\n    \"\"\"A simple calculator.\"\"\"\n    \n    def multiply(self, a: int, b: int) -> int:\n        \"\"\"Multiply two numbers.\"\"\"\n        return a * b",
-            docstring="A simple calculator.",
-            methods=[method],
-            base_classes=[]
+        assert writer.api_key == "test-key"
+        assert writer.code_understanding == mock_code_understanding
+        assert writer.template_manager == mock_template_manager
+        
+        # Check LLM provider initialization
+        mock_llm_provider_factory.create_provider.assert_called_once_with("claude", "test-key")
+    
+    def test_generate_function_test(self, mock_code_understanding, mock_template_manager, 
+                                  mock_llm_provider_factory, function_to_test):
+        """Test generating a test for a function."""
+        writer = AIPoweredTestWriter(
+            api_key="test-key",
+            code_understanding=mock_code_understanding,
+            template_manager=mock_template_manager,
+            provider_name="claude"
         )
+        
+        # Test generating a function test
+        test_code = writer.generate_function_test(function_to_test, "pytest")
+        
+        # Check template manager usage
+        mock_template_manager.get_templates_for_language_framework.assert_called_with("python", "pytest")
+        
+        # Verify test content
+        assert "import pytest" in test_code
+        assert "from math.operations import add" in test_code
+        assert "def test_add():" in test_code
+        assert "x = 5" in test_code
+        assert "y = 10" in test_code
+        assert "result = add(x, y)" in test_code
+        assert "assert result == 15" in test_code
     
-    @pytest.mark.skip(reason="Need to fix mocks for LangChain")
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_init(self, mock_claude):
-        """Test initializing the AIPoweredTestWriter."""
-        code_understanding = MagicMock(spec=CodeUnderstandingModule)
-        template_manager = MagicMock(spec=TestTemplateManager)
+    def test_generate_method_test(self, mock_code_understanding, mock_template_manager, 
+                                mock_llm_provider_factory, method_to_test):
+        """Test generating a test for a class method."""
+        writer = AIPoweredTestWriter(
+            api_key="test-key",
+            code_understanding=mock_code_understanding,
+            template_manager=mock_template_manager,
+            provider_name="claude"
+        )
         
-        writer = AIPoweredTestWriter("fake_api_key", code_understanding, template_manager)
-        
-        assert writer.api_key == "fake_api_key"
-        assert writer.code_understanding == code_understanding
-        assert writer.template_manager == template_manager
-        assert writer.model is not None
-        mock_claude.assert_called_once()
-    
-    @pytest.mark.skip(reason="Need to fix mocks for LangChain")
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_generate_function_test_with_template(self, mock_claude, mock_function):
-        """Test generating a test for a function using a template."""
-        # Mock the necessary components
-        code_understanding = MagicMock(spec=CodeUnderstandingModule)
-        code_understanding.repo_path = "/repo"
-        
-        template_manager = MagicMock(spec=TestTemplateManager)
-        template = MagicMock()
-        template.name = "pytest_function"
-        template_manager.get_templates_for_language_framework.return_value = [template]
-        template_manager.create_test_from_template.return_value = "def test_add():\n    assert add(1, 2) == 3"
-        
-        # Mock Claude responses
-        mock_model = MagicMock()
+        # Mock response for method test
         mock_response = MagicMock()
-        mock_response.content = """```json
-{
-  "arrange_code": "a = 1\\nb = 2",
-  "function_call": "add(a, b)",
-  "assert_code": "assert result == 3",
-  "test_description": "adds two positive numbers"
-}
-```"""
-        mock_model.invoke.return_value = mock_response
-        mock_claude.return_value = mock_model
+        mock_response.content = '```json\n{"instance_create": "calculator = Calculator()", "arrange_code": "x = 5\\ny = 10", "method_call": "calculator.add(x, y)", "assert_code": "assert result == 15"}\n```'
+        writer.model.invoke.return_value = mock_response
         
-        # Create the test writer
-        writer = AIPoweredTestWriter("fake_api_key", code_understanding, template_manager)
+        # Test generating a method test (using the function test method since method_test doesn't exist)
+        test_code = writer.generate_function_test(method_to_test, "pytest")
         
-        # Generate a test
-        test_code = writer.generate_function_test(mock_function, framework="pytest")
+        # Check template manager usage
+        mock_template_manager.get_templates_for_language_framework.assert_called_with("python", "pytest")
         
-        # Verify the correct methods were called
-        template_manager.get_templates_for_language_framework.assert_called_once_with("python", "pytest")
-        template_manager.create_test_from_template.assert_called_once()
-        mock_model.invoke.assert_called_once()
-        
-        # Check the result
-        assert test_code == "def test_add():\n    assert add(1, 2) == 3"
+        # Verify test content
+        assert "import pytest" in test_code
+        assert "from math.calculator import Calculator" in test_code
+        assert "def test_add():" in test_code
+        assert "calculator = Calculator()" in test_code
+        assert "x = 5" in test_code
+        assert "y = 10" in test_code
+        assert "result = calculator.add(x, y)" in test_code
+        assert "assert result == 15" in test_code
     
-    @pytest.mark.skip(reason="Need to fix mocks for LangChain")
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_generate_function_test_without_template(self, mock_claude, mock_function):
-        """Test generating a test for a function without a template."""
-        # Mock the necessary components
-        code_understanding = MagicMock(spec=CodeUnderstandingModule)
-        code_understanding.repo_path = "/repo"
+    def test_generate_class_test(self, mock_code_understanding, mock_template_manager, 
+                               mock_llm_provider_factory, class_to_test):
+        """Test generating a test for a class."""
+        writer = AIPoweredTestWriter(
+            api_key="test-key",
+            code_understanding=mock_code_understanding,
+            template_manager=mock_template_manager,
+            provider_name="claude"
+        )
         
-        template_manager = MagicMock(spec=TestTemplateManager)
-        template_manager.get_templates_for_language_framework.return_value = []  # No templates
+        # Mock response for class test
+        mock_response = MagicMock()
+        mock_response.content = '```json\n{"fixture_code": "# Initialize calculator", "instance_creation": "Calculator()", "test_methods": "def test_add(self, calculator):\\n    result = calculator.add(2, 3)\\n    assert result == 5"}\n```'
+        writer.model.invoke.return_value = mock_response
         
-        # Mock Claude responses
-        mock_model = MagicMock()
+        # Test generating a class test
+        test_code = writer.generate_class_test(class_to_test, "pytest")
+        
+        # Check template manager usage
+        mock_template_manager.get_templates_for_language_framework.assert_called_with("python", "pytest")
+        
+        # Verify test content
+        assert "import pytest" in test_code
+        assert "from math.calculator import Calculator" in test_code
+        assert "class TestCalculator:" in test_code
+        assert "@pytest.fixture" in test_code
+        assert "def calculator(self):" in test_code
+        assert "# Initialize calculator" in test_code
+        assert "return Calculator()" in test_code
+        assert "def test_add(self, calculator):" in test_code
+        assert "result = calculator.add(2, 3)" in test_code
+        assert "assert result == 5" in test_code
+    
+    def test_generate_test_with_ai_fallback(self, mock_code_understanding, mock_template_manager, 
+                                         mock_llm_provider_factory, function_to_test):
+        """Test generating a test with AI when no template is available."""
+        writer = AIPoweredTestWriter(
+            api_key="test-key",
+            code_understanding=mock_code_understanding,
+            template_manager=mock_template_manager,
+            provider_name="claude"
+        )
+        
+        # Make template lookup return empty
+        mock_template_manager.get_templates_for_language_framework.return_value = []
+        
+        # Mock AI response
         mock_response = MagicMock()
         mock_response.content = """```python
+import pytest
+
 def test_add():
-    # Test adding two positive numbers
-    assert add(1, 2) == 3
+    # Test normal case
+    assert add(2, 3) == 5
     
-    # Test adding a positive and negative number
-    assert add(5, -3) == 2
-    
-    # Test adding two negative numbers
-    assert add(-1, -1) == -2
+    # Test edge cases
+    assert add(-1, 1) == 0
+    assert add(0, 0) == 0
 ```"""
-        mock_model.invoke.return_value = mock_response
-        mock_claude.return_value = mock_model
+        writer.model.invoke.return_value = mock_response
         
-        # Create the test writer
-        writer = AIPoweredTestWriter("fake_api_key", code_understanding, template_manager)
+        # Test generating a function test with AI fallback
+        test_code = writer.generate_function_test(function_to_test, "pytest")
         
-        # Generate a test
-        test_code = writer.generate_function_test(mock_function, framework="pytest")
+        # Check if model was called
+        writer.model.invoke.assert_called()
         
-        # Verify the correct methods were called
-        template_manager.get_templates_for_language_framework.assert_called_once_with("python", "pytest")
-        mock_model.invoke.assert_called()
-        
-        # Check the result
+        # Verify test content
+        assert "import pytest" in test_code
         assert "def test_add():" in test_code
-        assert "assert add(1, 2) == 3" in test_code
-        assert "assert add(5, -3) == 2" in test_code
-        assert "assert add(-1, -1) == -2" in test_code
+        assert "assert add(2, 3) == 5" in test_code
+        assert "assert add(-1, 1) == 0" in test_code
+        assert "assert add(0, 0) == 0" in test_code
     
-    @pytest.mark.skip(reason="Need to fix mocks for LangChain")
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_generate_method_test(self, mock_claude, mock_method):
-        """Test generating a test for a method using a template."""
-        # Mock the necessary components
-        code_understanding = MagicMock(spec=CodeUnderstandingModule)
-        code_understanding.repo_path = "/repo"
+    def test_file_path_to_module_path(self, mock_code_understanding, mock_template_manager, 
+                                    mock_llm_provider_factory):
+        """Test converting file paths to module paths."""
+        writer = AIPoweredTestWriter(
+            api_key="test-key",
+            code_understanding=mock_code_understanding,
+            template_manager=mock_template_manager,
+            provider_name="claude"
+        )
         
-        template_manager = MagicMock(spec=TestTemplateManager)
-        template = MagicMock()
-        template.name = "pytest_method"
-        template_manager.get_templates_for_language_framework.return_value = [template]
-        template_manager.create_test_from_template.return_value = "def test_subtract():\n    calc = Calculator()\n    assert calc.subtract(5, 3) == 2"
+        # Test regular Python file
+        assert writer._file_path_to_module_path("math/operations.py") == "math.operations"
         
-        # Mock Claude responses
-        mock_model = MagicMock()
-        mock_response = MagicMock()
-        mock_response.content = """```json
-{
-  "instance_create": "calc = Calculator()",
-  "arrange_code": "a = 5\\nb = 3",
-  "method_call": "calc.subtract(a, b)",
-  "assert_code": "assert result == 2"
-}
-```"""
-        mock_model.invoke.return_value = mock_response
-        mock_claude.return_value = mock_model
-        
-        # Create the test writer
-        writer = AIPoweredTestWriter("fake_api_key", code_understanding, template_manager)
-        
-        # Generate a test
-        test_code = writer.generate_function_test(mock_method, framework="pytest")
-        
-        # Verify the correct methods were called
-        template_manager.get_templates_for_language_framework.assert_called_once_with("python", "pytest")
-        template_manager.create_test_from_template.assert_called_once()
-        mock_model.invoke.assert_called_once()
-        
-        # Check the result
-        assert test_code == "def test_subtract():\n    calc = Calculator()\n    assert calc.subtract(5, 3) == 2"
-    
-    @pytest.mark.skip(reason="Need to fix mocks for LangChain")
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_generate_class_test(self, mock_claude, mock_class):
-        """Test generating a test for a class using a template."""
-        # Mock the necessary components
-        code_understanding = MagicMock(spec=CodeUnderstandingModule)
-        code_understanding.repo_path = "/repo"
-        
-        template_manager = MagicMock(spec=TestTemplateManager)
-        template = MagicMock()
-        template.name = "pytest_class"
-        template_manager.get_templates_for_language_framework.return_value = [template]
-        template_manager.create_test_from_template.return_value = "class TestCalculator:\n    def test_multiply(self):\n        calc = Calculator()\n        assert calc.multiply(3, 4) == 12"
-        
-        # Mock Claude responses
-        mock_model = MagicMock()
-        mock_response = MagicMock()
-        mock_response.content = """```json
-{
-  "fixture_code": "",
-  "instance_creation": "Calculator()",
-  "test_methods": "def test_multiply(self, calculator):\\n    assert calculator.multiply(3, 4) == 12"
-}
-```"""
-        mock_model.invoke.return_value = mock_response
-        mock_claude.return_value = mock_model
-        
-        # Create the test writer
-        writer = AIPoweredTestWriter("fake_api_key", code_understanding, template_manager)
-        
-        # Generate a test
-        test_code = writer.generate_class_test(mock_class, framework="pytest")
-        
-        # Verify the correct methods were called
-        template_manager.get_templates_for_language_framework.assert_called_once_with("python", "pytest")
-        template_manager.create_test_from_template.assert_called_once()
-        mock_model.invoke.assert_called_once()
-        
-        # Check the result
-        assert test_code == "class TestCalculator:\n    def test_multiply(self):\n        calc = Calculator()\n        assert calc.multiply(3, 4) == 12"
-    
-    @pytest.mark.skip(reason="Need to fix mocks for LangChain")
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_file_path_to_module_path(self, mock_claude):
-        """Test converting a file path to a Python module path."""
-        code_understanding = MagicMock(spec=CodeUnderstandingModule)
-        template_manager = MagicMock(spec=TestTemplateManager)
-        
-        writer = AIPoweredTestWriter("fake_api_key", code_understanding, template_manager)
-        
-        # Test with .py extension
-        module_path = writer._file_path_to_module_path("app/models/user.py")
-        assert module_path == "app.models.user"
-        
-        # Test without .py extension
-        module_path = writer._file_path_to_module_path("app/models/user")
-        assert module_path == "app.models.user"
+        # Test file with no extension
+        assert writer._file_path_to_module_path("math/operations") == "math.operations"
         
         # Test with __init__.py
-        module_path = writer._file_path_to_module_path("app/models/__init__.py")
-        assert module_path == "app.models"
+        assert writer._file_path_to_module_path("math/__init__.py") == "math"
         
-        # Test with Windows-style paths
-        module_path = writer._file_path_to_module_path("app\\models\\user.py")
-        assert module_path == "app.models.user"
+        # Test with Windows paths
+        assert writer._file_path_to_module_path("math\\operations.py") == "math.operations"
