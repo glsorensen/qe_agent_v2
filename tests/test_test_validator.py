@@ -30,7 +30,7 @@ class TestTestValidator:
         assert validator.model is None
         assert validator.test_runner is not None
     
-    @patch("test_coverage_agent.test_execution.test_validator.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_init_with_api_key(self, mock_claude, sample_repo):
         """Test initializing the TestValidator with an API key."""
         # For this test, we skip the mock check since the import is already mocked
