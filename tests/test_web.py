@@ -3,7 +3,6 @@ import sys
 import pytest
 from unittest.mock import patch, MagicMock
 import streamlit as st
-import pandas as pd
 import tempfile
 
 # Mock streamlit for testing

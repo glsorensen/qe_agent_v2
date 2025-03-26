@@ -2,7 +2,7 @@ import os
 import tempfile
 import streamlit as st
 import json
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
 
 # Import necessary components
 from test_coverage_agent.repository import RepositoryScanner, TestDetector, CoverageAnalyzer
