@@ -85,7 +85,29 @@ mypy .
 
 ## 📚 Documentation
 
-For more details on the architecture and components:
+Comprehensive documentation is available in the `docs/` directory and can be viewed as a static site using MkDocs:
+
+```bash
+# Install MkDocs
+pip install mkdocs
+
+# Build the documentation
+mkdocs build
+
+# Serve the documentation locally (with live reloading)
+mkdocs serve
+```
+
+Then open http://localhost:8000 in your browser to view the documentation.
+
+Documentation structure:
+
+- **Getting Started**: Installation, basic usage, and quick examples
+- **User Guide**: Detailed explanations of features and use cases
+- **Developer Guide**: Contributing, architecture, and design decisions
+- **API Reference**: Detailed documentation for all modules and classes
+
+Code organization:
 
 - `repository/`: Modules for scanning and analyzing repositories
 - `test_execution/`: Tools for running and validating tests

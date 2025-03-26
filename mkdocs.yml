@@ -1,0 +1,39 @@
+site_name: Test Coverage Agent
+site_description: AI-powered tool for analyzing and improving test coverage in Python projects
+theme:
+  name: readthedocs
+  highlightjs: true
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Overview: getting_started/index.md
+    - Examples: getting_started/examples.md
+    - Configuration: getting_started/configuration.md
+  - User Guide:
+    - Overview: user_guide/index.md
+    - Repository Analysis: user_guide/repository_analysis.md
+    - Test Detection: user_guide/test_detection.md
+    - Coverage Analysis: user_guide/coverage_analysis.md
+    - Test Validation: user_guide/test_validation.md
+    - Test Generation: user_guide/test_generation.md
+  - Developer Guide:
+    - Overview: developer_guide/index.md
+    - Architecture: developer_guide/architecture.md
+    - Development Setup: developer_guide/development_setup.md
+    - Code Structure: developer_guide/code_structure.md
+    - Extending the Agent: developer_guide/extending.md
+    - Contributing: developer_guide/contributing.md
+  - API Reference:
+    - Overview: api_reference/index.md
+    - Repository Module: api_reference/repository.md
+    - Test Execution Module: api_reference/test_execution.md
+    - Test Generation Module: api_reference/test_generation.md
+    - UI Module: api_reference/ui.md
+    - Data Models: api_reference/data_models.md
