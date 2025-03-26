@@ -21,8 +21,7 @@ class TestWebUI:
     def web_ui(self):
         """Create a WebUI instance."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            ui = WebUI()
-            ui.repo_path = temp_dir
+            ui = WebUI(temp_dir)
             yield ui
     
     @pytest.fixture
@@ -86,18 +85,14 @@ class TestWebUI:
 
     def test_init(self):
         """Test initializing the web interface."""
-        ui = WebUI()
-        
-        assert ui.repo_path is None
-        assert ui.api_key is None
-        assert ui.llm_provider == "claude"
-        assert ui.scanner is None
-        assert ui.detector is None
-        assert ui.analyzer is None
-        assert ui.code_understanding is None
-        assert ui.template_manager is None
-        assert ui.test_writer is None
-        assert ui.test_validator is None
+        with tempfile.TemporaryDirectory() as temp_dir:
+            ui = WebUI(temp_dir)
+            
+            assert ui.repo_path == temp_dir
+            assert ui.scanner is None
+            assert ui.detector is None
+            assert ui.analyzer is None
+            assert hasattr(ui, 'reports')
     
     def test_scan_repository(self, web_ui, mock_repository_scanner):
         """Test scanning a repository."""
