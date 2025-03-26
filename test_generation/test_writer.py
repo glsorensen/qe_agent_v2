@@ -3,9 +3,9 @@ import re
 from typing import Dict, List, Optional, Set, Tuple, Any
 
 from langchain.chains import LLMChain
-from langchain.chat_models import ChatAnthropic
-from langchain.prompts import PromptTemplate
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_community.chat_models import ChatAnthropic
+from langchain_core.prompts import PromptTemplate
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from .code_understanding import CodeUnderstandingModule, Function, Class
 from .template_manager import TestTemplateManager, TestTemplate

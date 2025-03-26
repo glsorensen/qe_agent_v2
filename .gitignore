@@ -29,4 +29,5 @@ htmlcov/
 *.swo
 *.swn
 *~
-.DS_Store
+.DS_Storesite/
+site/

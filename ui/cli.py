@@ -5,9 +5,9 @@ from typing import Dict, List, Optional, Set, Tuple, Any
 import json
 
 # Import necessary components
-from ..repository import RepositoryScanner, TestDetector, CoverageAnalyzer
-from ..test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
-from ..test_execution import TestRunner, TestValidator, CoverageReporter
+from repository import RepositoryScanner, TestDetector, CoverageAnalyzer
+from test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
+from test_execution import TestRunner, TestValidator, CoverageReporter
 
 
 @click.group()

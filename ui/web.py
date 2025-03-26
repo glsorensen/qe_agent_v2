@@ -4,10 +4,15 @@ import streamlit as st
 import json
 from typing import Dict, List, Optional, Set, Tuple, Any
 
+# Add parent directory to path to make imports work
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 # Import necessary components
-from ..repository import RepositoryScanner, TestDetector, CoverageAnalyzer
-from ..test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
-from ..test_execution import TestRunner, TestValidator, CoverageReporter
+from repository import RepositoryScanner, TestDetector, CoverageAnalyzer
+from test_generation import CodeUnderstandingModule, TestTemplateManager, AIPoweredTestWriter
+from test_execution import TestRunner, TestValidator, CoverageReporter
 
 
 def main():
@@ -33,7 +38,7 @@ def main():
     # Option to use a sample repository
     use_sample = st.sidebar.checkbox("Use sample repository")
     if use_sample:
-        repo_path = "./sample_repo"  # Sample repository path
+        repo_path = "/Users/gunnar.sorensen/Documents/taskstream"  # Sample repository path
     
     # Main section tabs
     tab1, tab2, tab3 = st.tabs(["Repository Analysis", "Test Generation", "Results & Reports"])
@@ -42,7 +47,7 @@ def main():
     with tab1:
         st.header("Repository Analysis")
         
-        if st.button("Analyze Repository", disabled=not repo_path):
+        if st.button("Analyze Repository", disabled=not repo_path, key="analyze_repo_button"):
             if not os.path.exists(repo_path):
                 st.error(f"Repository path does not exist: {repo_path}")
                 return
@@ -135,7 +140,7 @@ def main():
             st.success(f"Repository analysis completed for: {analysis['repo_path']}")
             
             # Re-display stats if we're returning to this tab
-            if not st.button("Analyze Repository", disabled=not repo_path):
+            if not st.button("Analyze Repository", disabled=not repo_path, key="analyze_repo_again_button"):
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric("Source Files", len(analysis['source_files']))

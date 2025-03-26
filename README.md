@@ -55,6 +55,9 @@ python run.py /path/to/repo --generate --api-key YOUR_ANTHROPIC_API_KEY
 # Start the web server
 python run.py --web
 
+# Optionally specify a repository path 
+python run.py --web /path/to/your/repo
+
 # Then open http://localhost:8501 in your browser
 ```
 

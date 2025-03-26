@@ -18,6 +18,7 @@ def main():
     
     parser.add_argument(
         "repo_path", 
+        nargs='?',  # Make repo_path optional
         help="Path to the repository to analyze"
     )
     
@@ -47,12 +48,20 @@ def main():
     
     # Check if web interface is requested
     if args.web:
-        from ui.web import main as web_main
-        web_main()
+        import subprocess
+        import os
+        web_script_path = os.path.join(os.path.dirname(__file__), 'ui', 'web.py')
+        print(f"Starting Streamlit web interface from: {web_script_path}")
+        subprocess.run(['streamlit', 'run', web_script_path])
         return
     
-    # Use CLI via click
-    cli()
+    # Check if a repository path was provided
+    if args.repo_path:
+        # Use CLI via click
+        from ui.cli import cli
+        cli(['analyze', args.repo_path])
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":
