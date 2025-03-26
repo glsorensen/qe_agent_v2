@@ -16,7 +16,7 @@ An AI-powered tool that intelligently analyzes code repositories, identifies tes
 - 🔍 **Smart Repository Scanning** - Automatically analyzes codebases in multiple languages
 - 🔬 **Framework Detection** - Identifies testing frameworks and patterns in your code
 - 📊 **Coverage Analysis** - Pinpoints untested code and prioritizes what to test next
-- 🤖 **AI-Powered Test Generation** - Creates meaningful tests with proper assertions
+- 🤖 **AI-Powered Test Generation** - Creates meaningful tests with proper assertions using Claude or Gemini
 - ✅ **Test Validation** - Ensures generated tests are correct and comprehensive
 - 📈 **Detailed Reporting** - Provides metrics and insights about test coverage
 - 🖥️ **Multiple Interfaces** - Choose between CLI or web interface based on your needs
@@ -50,8 +50,11 @@ python -m test_coverage_agent.main /path/to/repo
 # Run with web interface
 python run.py --web
 
-# Generate tests
-python run.py /path/to/repo --generate --api-key YOUR_ANTHROPIC_API_KEY
+# Generate tests with Claude
+python run.py /path/to/repo --generate --api-key YOUR_CLAUDE_API_KEY --llm-provider claude
+
+# Generate tests with Gemini
+python run.py /path/to/repo --generate --api-key YOUR_GEMINI_API_KEY --llm-provider gemini
 ```
 
 ### Web Interface

@@ -24,7 +24,14 @@ def main():
     
     parser.add_argument(
         "--api-key", "-k",
-        help="Anthropic API key for AI test generation"
+        help="API key for AI test generation"
+    )
+    
+    parser.add_argument(
+        "--llm-provider", "-p",
+        choices=["claude", "gemini"],
+        default="claude",
+        help="LLM provider to use for test generation (default: claude)"
     )
     
     parser.add_argument(

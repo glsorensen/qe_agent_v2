@@ -6,11 +6,113 @@ This guide explains how to extend the Test Coverage Agent with custom components
 
 The Test Coverage Agent provides several key extension points:
 
-1. **Test Templates**: Add custom templates for generating tests
-2. **Validation Rules**: Define custom rules for validating test quality
-3. **Report Formats**: Add new formats for coverage reports
-4. **Analyzers**: Create specialized code analyzers
-5. **UI Extensions**: Extend the CLI or web interfaces
+1. **LLM Providers**: Add support for additional language model providers
+2. **Test Templates**: Add custom templates for generating tests
+3. **Validation Rules**: Define custom rules for validating test quality
+4. **Report Formats**: Add new formats for coverage reports
+5. **Analyzers**: Create specialized code analyzers
+6. **UI Extensions**: Extend the CLI or web interfaces
+
+## Adding a New LLM Provider
+
+The agent uses an abstraction layer for LLM providers, making it easy to add support for new models. Follow these steps to add a new provider:
+
+### 1. Create a New Provider Class
+
+Add a new class in `src/test_coverage_agent/test_generation/llm_provider.py` that inherits from the `LLMProvider` abstract base class:
+
+```python
+class NewProvider(LLMProvider):
+    """New LLM provider implementation."""
+    
+    def __init__(self, api_key: str, model_name: str = "model-name", temperature: float = 0.2):
+        """Initialize the new provider.
+        
+        Args:
+            api_key: Provider API key
+            model_name: Model name to use
+            temperature: Temperature parameter for generation
+        """
+        self.api_key = api_key
+        self.model_name = model_name
+        self.temperature = temperature
+        self._model = None
+    
+    def get_model(self) -> BaseChatModel:
+        """Get the model instance.
+        
+        Returns:
+            An instance of the model
+        """
+        if self._model is None:
+            from new_provider_library import ChatModel
+            self._model = ChatModel(
+                api_key=self.api_key,
+                model=self.model_name,
+                temperature=self.temperature
+            )
+        return self._model
+    
+    def get_name(self) -> str:
+        """Get the name of the provider.
+        
+        Returns:
+            Provider name as a string
+        """
+        return "new_provider"
+```
+
+### 2. Update the Factory Class
+
+Modify the `LLMProviderFactory.create_provider` method to support your new provider:
+
+```python
+@staticmethod
+def create_provider(provider_name: str, api_key: str, **kwargs) -> LLMProvider:
+    """Create an LLM provider instance based on name."""
+    if provider_name.lower() == "claude":
+        return ClaudeProvider(api_key, **kwargs)
+    elif provider_name.lower() == "gemini":
+        return GeminiProvider(api_key, **kwargs)
+    elif provider_name.lower() == "new_provider":
+        return NewProvider(api_key, **kwargs)
+    else:
+        raise ValueError(f"Unsupported LLM provider: {provider_name}")
+```
+
+### 3. Add Dependencies
+
+Update `pyproject.toml` and `requirements.txt` to include the necessary libraries for your provider:
+
+```toml
+# In pyproject.toml
+dependencies = [
+    # ... existing dependencies
+    "new-provider-library>=1.0.0",
+]
+```
+
+### 4. Update CLI and Web Interface
+
+Modify the CLI and web interface to include your new provider as an option:
+
+```python
+# In src/test_coverage_agent/main.py
+parser.add_argument(
+    "--llm-provider", "-p",
+    choices=["claude", "gemini", "new_provider"],
+    default="claude",
+    help="LLM provider to use for test generation"
+)
+```
+
+### 5. Add Documentation
+
+Document your new provider in `docs/user_guide/llm_providers.md`.
+
+### 6. Write Tests
+
+Create tests for your new provider in `tests/test_llm_provider.py`.
 
 ## Adding Custom Test Templates
 
