@@ -22,7 +22,7 @@ class TestLLMProvider(unittest.TestCase):
         provider = GeminiProvider("test_api_key")
         self.assertEqual(provider.get_name(), "gemini")
 
-    @patch("src.test_coverage_agent.test_generation.llm_provider.ChatAnthropic")
+    @patch("langchain_community.chat_models.ChatAnthropic")
     def test_claude_provider_model(self, mock_chat_anthropic):
         """Test that Claude provider initializes the model correctly."""
         # Setup mock
@@ -41,7 +41,7 @@ class TestLLMProvider(unittest.TestCase):
         )
         self.assertEqual(model, mock_instance)
 
-    @patch("src.test_coverage_agent.test_generation.llm_provider.ChatGoogleGenerativeAI")
+    @patch("langchain_google_genai.ChatGoogleGenerativeAI")
     def test_gemini_provider_model(self, mock_chat_gemini):
         """Test that Gemini provider initializes the model correctly."""
         # Setup mock
