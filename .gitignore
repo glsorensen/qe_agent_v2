@@ -30,3 +30,4 @@ htmlcov/
 *.swn
 *~
 .DS_Storesite/
+site/
