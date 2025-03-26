@@ -2,8 +2,8 @@ import os
 import re
 from typing import Dict, List, Optional, Set, Tuple, Any
 
-from langchain.chat_models import ChatAnthropic
-from langchain.schema import HumanMessage, SystemMessage
+from langchain_community.chat_models import ChatAnthropic
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from .test_runner import TestRunner, TestRunResult
 
