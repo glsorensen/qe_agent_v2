@@ -30,15 +30,20 @@ class TestTestValidator:
         assert validator.model is None
         assert validator.test_runner is not None
     
-    @patch("langchain_community.chat_models.ChatAnthropic")
-    def test_init_with_api_key(self, mock_claude, sample_repo):
+    @patch("test_coverage_agent.test_execution.test_validator.LLMProviderFactory")
+    def test_init_with_api_key(self, mock_factory, sample_repo):
         """Test initializing the TestValidator with an API key."""
-        # For this test, we skip the mock check since the import is already mocked
+        # Setup mock factory and provider
+        mock_provider = MagicMock()
+        mock_provider.get_model.return_value = MagicMock()
+        mock_factory.create_provider.return_value = mock_provider
+        
         validator = TestValidator(sample_repo, api_key="fake_key")
         
         assert validator.repo_path == sample_repo
         assert validator.api_key == "fake_key"
-        # Hard to test model creation here due to mocking, so we skip that assertion
+        # Check if the factory was called
+        mock_factory.create_provider.assert_called_once()
     
     def test_validate_syntax_python_valid(self, sample_repo):
         """Test validating valid Python test syntax."""
