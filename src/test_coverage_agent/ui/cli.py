@@ -81,10 +81,11 @@ def analyze(repo_path: str, output: Optional[str] = None):
 
 @cli.command()
 @click.argument('repo_path', type=click.Path(exists=True))
-@click.option('--api-key', '-k', required=True, help='Anthropic API key')
+@click.option('--api-key', '-k', required=True, help='API key for LLM provider')
+@click.option('--llm-provider', '-p', type=click.Choice(['claude', 'gemini']), default='claude', help='LLM provider to use')
 @click.option('--output-dir', '-o', help='Directory to save generated tests')
 @click.option('--limit', '-l', type=int, help='Limit the number of tests to generate')
-def generate(repo_path: str, api_key: str, output_dir: Optional[str] = None, limit: Optional[int] = None):
+def generate(repo_path: str, api_key: str, llm_provider: str = 'claude', output_dir: Optional[str] = None, limit: Optional[int] = None):
     """Generate tests for uncovered or poorly covered code."""
     click.echo(f"Generating tests for repository: {repo_path}")
     
@@ -134,11 +135,11 @@ def generate(repo_path: str, api_key: str, output_dir: Optional[str] = None, lim
     template_manager = TestTemplateManager()
     
     # Initialize test writer
-    click.echo("Initializing AI-powered test writer...")
-    test_writer = AIPoweredTestWriter(api_key, code_understanding, template_manager)
+    click.echo(f"Initializing AI-powered test writer with {llm_provider}...")
+    test_writer = AIPoweredTestWriter(api_key, code_understanding, template_manager, llm_provider)
     
     # Initialize test validator
-    test_validator = TestValidator(repo_path, api_key)
+    test_validator = TestValidator(repo_path, api_key, llm_provider)
     
     # Generate tests for priority files
     generated_tests = {}

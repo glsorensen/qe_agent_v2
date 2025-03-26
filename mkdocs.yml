@@ -23,6 +23,7 @@ nav:
     - Coverage Analysis: user_guide/coverage_analysis.md
     - Test Validation: user_guide/test_validation.md
     - Test Generation: user_guide/test_generation.md
+    - LLM Providers: user_guide/llm_providers.md
   - Developer Guide:
     - Overview: developer_guide/index.md
     - Architecture: developer_guide/architecture.md

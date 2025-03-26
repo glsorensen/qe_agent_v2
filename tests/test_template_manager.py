@@ -3,7 +3,7 @@ import pytest
 from test_coverage_agent.test_generation.template_manager import TestTemplateManager, TestTemplate
 
 
-class TestTestTemplateManager:
+class TemplateManagerTests:
     """Tests for the TestTemplateManager class."""
     
     def test_init(self):

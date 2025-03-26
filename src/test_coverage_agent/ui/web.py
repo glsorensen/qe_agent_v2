@@ -24,8 +24,16 @@ def main():
     # Sidebar
     st.sidebar.title("Configuration")
     
+    # LLM provider selection
+    llm_provider = st.sidebar.selectbox(
+        "LLM Provider",
+        ["claude", "gemini"],
+        index=0
+    )
+    
     # API key input
-    api_key = st.sidebar.text_input("Anthropic API Key", type="password")
+    api_key_label = "Claude API Key" if llm_provider == "claude" else "Gemini API Key"
+    api_key = st.sidebar.text_input(api_key_label, type="password")
     
     # Repository path input
     repo_path = st.sidebar.text_input("Repository Path", value="")
@@ -193,7 +201,7 @@ def main():
             
             # API key check
             if not api_key:
-                st.warning("Please enter your Anthropic API key in the sidebar to generate tests")
+                st.warning(f"Please enter your {llm_provider.capitalize()} API key in the sidebar to generate tests")
             
             # Generate button
             if st.button("Generate Tests", disabled=not api_key):
@@ -218,10 +226,10 @@ def main():
                         template_manager = TestTemplateManager()
                         
                         # Initialize test writer
-                        test_writer = AIPoweredTestWriter(api_key, code_understanding, template_manager)
+                        test_writer = AIPoweredTestWriter(api_key, code_understanding, template_manager, llm_provider)
                         
                         # Initialize test validator
-                        test_validator = TestValidator(repo_path, api_key)
+                        test_validator = TestValidator(repo_path, api_key, llm_provider)
                         
                         # Generate tests
                         generated_tests = {}

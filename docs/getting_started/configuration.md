@@ -36,6 +36,7 @@ usage: python run.py [repository_path] [options]
 - `--generate-tests`: Generate tests for untested methods
 - `--template TEMPLATE`: Specify test template (standard, minimal, comprehensive)
 - `--ai-mode MODE`: AI assistance level (suggest, review, generate)
+- `--llm-provider PROVIDER`: Specify LLM provider to use (claude, gemini)
 
 ## Configuration File
 
@@ -64,6 +65,7 @@ report:
 generation:
   template: standard
   ai_mode: generate
+  llm_provider: claude  # or gemini
 ```
 
 ## Environment Variables
@@ -73,3 +75,4 @@ The following environment variables can be used to configure the agent:
 - `TEST_COVERAGE_AGENT_DEBUG`: Set to "true" for debug mode
 - `TEST_COVERAGE_AGENT_CONFIG`: Path to configuration file
 - `TEST_COVERAGE_AGENT_API_KEY`: API key for AI services (if required)
+- `TEST_COVERAGE_AGENT_LLM_PROVIDER`: LLM provider to use (claude or gemini)

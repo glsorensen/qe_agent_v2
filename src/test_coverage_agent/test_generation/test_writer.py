@@ -3,40 +3,39 @@ import re
 from typing import Dict, List, Optional, Set, Tuple, Any
 
 from langchain.chains import LLMChain
-from langchain_community.chat_models import ChatAnthropic
 from langchain_core.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from .code_understanding import CodeUnderstandingModule, Function, Class
 from .template_manager import TestTemplateManager, TestTemplate
+from .llm_provider import LLMProvider, LLMProviderFactory
 
 
 class AIPoweredTestWriter:
-    """AI-powered test writer using Anthropic's Claude."""
+    """AI-powered test writer using language models."""
     
     def __init__(
         self, 
         api_key: str,
         code_understanding: CodeUnderstandingModule,
-        template_manager: TestTemplateManager
+        template_manager: TestTemplateManager,
+        provider_name: str = "claude"
     ):
         """Initialize the AI-powered test writer.
         
         Args:
-            api_key: Anthropic API key
+            api_key: API key for the LLM provider
             code_understanding: Code understanding module instance
             template_manager: Test template manager instance
+            provider_name: Name of the LLM provider to use (default: "claude")
         """
         self.api_key = api_key
         self.code_understanding = code_understanding
         self.template_manager = template_manager
         
-        # Initialize the Claude model
-        self.model = ChatAnthropic(
-            anthropic_api_key=api_key,
-            model_name="claude-3-7-sonnet-20250219",
-            temperature=0.2
-        )
+        # Initialize the LLM provider
+        self.llm_provider = LLMProviderFactory.create_provider(provider_name, api_key)
+        self.model = self.llm_provider.get_model()
         
         # System prompt for the model
         self.system_prompt = """

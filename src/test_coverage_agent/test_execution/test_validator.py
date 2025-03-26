@@ -2,10 +2,10 @@ import os
 import re
 from typing import Dict, List, Optional, Set, Tuple, Any
 
-from langchain_community.chat_models import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from .test_runner import TestRunner, TestRunResult
+from ..test_generation.llm_provider import LLMProvider, LLMProviderFactory
 
 
 class TestValidationResult:
@@ -35,25 +35,24 @@ class TestValidationResult:
 class TestValidator:
     """Validator for verifying generated tests."""
     
-    def __init__(self, repo_path: str, api_key: Optional[str] = None):
+    def __init__(self, repo_path: str, api_key: Optional[str] = None, provider_name: str = "claude"):
         """Initialize the test validator.
         
         Args:
             repo_path: Path to the repository
-            api_key: Anthropic API key for AI validation (optional)
+            api_key: API key for LLM provider (optional)
+            provider_name: Name of the LLM provider to use (default: "claude")
         """
         self.repo_path = repo_path
         self.api_key = api_key
         self.test_runner = TestRunner(repo_path)
         
-        # Initialize AI model if API key is provided
+        # Initialize LLM provider if API key is provided
         self.model = None
+        self.llm_provider = None
         if api_key:
-            self.model = ChatAnthropic(
-                anthropic_api_key=api_key,
-                model_name="claude-3-7-sonnet-20250219",
-                temperature=0.2
-            )
+            self.llm_provider = LLMProviderFactory.create_provider(provider_name, api_key)
+            self.model = self.llm_provider.get_model()
     
     def validate_test(
         self, 
