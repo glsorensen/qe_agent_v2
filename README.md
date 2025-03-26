@@ -4,7 +4,8 @@
 
 ![Test Coverage](https://img.shields.io/badge/Test%20Coverage-Enhanced-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/glsorensen/qe_agent_v2/graph/badge.svg?token=AJ1RWXR5GM)](https://codecov.io/gh/glsorensen/qe_agent_v2)
+
 
 </div>
 
