@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "test-coverage-agent"
+version = "0.1.0"
+description = "AI-powered test coverage enhancement agent"
+requires-python = ">=3.8"
+dependencies = [
+    "langchain",
+    "langchain-anthropic",
+    "anthropic",
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "click",
+    "flask",
+    "streamlit"
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "flake8",
+    "black"
+]
+
+[tool.mypy]
+python_version = "3.8"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
