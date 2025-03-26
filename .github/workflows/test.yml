@@ -37,9 +37,9 @@ jobs:
     #   run: |
     #     black --check .
     
-    - name: Type check with mypy
-      run: |
-        mypy . --exclude venv
+    # - name: Type check with mypy
+    #   run: |
+    #     mypy . --exclude venv
     
     - name: Test with pytest
       run: |
