@@ -49,12 +49,23 @@ class ClaudeProvider(LLMProvider):
             An instance of the Claude model
         """
         if self._model is None:
-            from langchain_community.chat_models import ChatAnthropic
-            self._model = ChatAnthropic(
-                anthropic_api_key=self.api_key,
-                model_name=self.model_name,
-                temperature=self.temperature
-            )
+            try:
+                # Try using direct Anthropic integration
+                from langchain_anthropic import ChatAnthropic
+                self._model = ChatAnthropic(
+                    api_key=self.api_key,
+                    model_name=self.model_name,
+                    temperature=self.temperature
+                )
+            except (ImportError, AttributeError) as e:
+                # Fall back to community implementation if there's an issue
+                print(f"Warning: Error with langchain_anthropic: {e}, falling back to community implementation")
+                from langchain_community.chat_models import ChatAnthropic
+                self._model = ChatAnthropic(
+                    anthropic_api_key=self.api_key,
+                    model_name=self.model_name,
+                    temperature=self.temperature
+                )
         return self._model
     
     def get_name(self) -> str:
@@ -89,12 +100,27 @@ class GeminiProvider(LLMProvider):
             An instance of the Gemini model
         """
         if self._model is None:
-            from langchain_google_genai import ChatGoogleGenerativeAI
-            self._model = ChatGoogleGenerativeAI(
-                google_api_key=self.api_key,
-                model=self.model_name,
-                temperature=self.temperature
-            )
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                self._model = ChatGoogleGenerativeAI(
+                    google_api_key=self.api_key,
+                    model=self.model_name,
+                    temperature=self.temperature,
+                    convert_system_message_to_human=True
+                )
+            except (ImportError, AttributeError) as e:
+                # Fall back if there's an issue
+                print(f"Warning: Error with langchain_google_genai: {e}, trying alternative implementation")
+                try:
+                    from langchain_community.chat_models import ChatGoogleGenerativeAI
+                    self._model = ChatGoogleGenerativeAI(
+                        google_api_key=self.api_key,
+                        model=self.model_name,
+                        temperature=self.temperature,
+                        convert_system_message_to_human=True
+                    )
+                except Exception as e2:
+                    raise ImportError(f"Failed to initialize Gemini provider: {e2}") from e2
         return self._model
     
     def get_name(self) -> str:
